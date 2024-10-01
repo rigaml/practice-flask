@@ -1,6 +1,6 @@
 [tool.poetry]
 package-mode = false
-name = "junior-technical-test-template"
+name = "practice-flask"
 
 [tool.poetry.dependencies]
 python = "^3.12"
