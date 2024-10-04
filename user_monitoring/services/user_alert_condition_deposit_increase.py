@@ -1,5 +1,6 @@
 
 
+from decimal import Decimal
 from user_monitoring.services.user_alert_condition import UserAlertCondition
 from user_monitoring.models.user_action import UserAction, ActionType
 
@@ -10,13 +11,20 @@ class UserAlertConditionDepositIncrease(UserAlertCondition):
     deposit (withdrawals in between deposits can be ignored).
     """
 
-    COUNT_DEPOSIT_LIMIT = 3
+    DEPOSIT_COUNT_LIMIT = 3
+
+    def __init__(self):
+        super().__init__()
+        self._operation_limit = self.DEPOSIT_COUNT_LIMIT
 
     @property
     def code(self) -> int:
         return 300
 
-    def check(self, user_actions: list[UserAction]) -> bool:
+    def _check_user_action(self, user_actions: list[UserAction], amount_limit: Decimal | None, operation_limit: int | None) -> bool:
+
+        assert operation_limit is not None, "operation_limit should never be None here"
+
         last_user_action = user_actions[-1]
         if last_user_action.type != ActionType.DEPOSIT:
             return False
@@ -32,7 +40,7 @@ class UserAlertConditionDepositIncrease(UserAlertCondition):
 
             if current_user_action.amount < later_deposit_amount:
                 count_deposits_increase += 1
-                if count_deposits_increase >= self.COUNT_DEPOSIT_LIMIT:
+                if count_deposits_increase >= operation_limit:
                     return True
             else:
                 return False

@@ -15,10 +15,10 @@ The payload format:
 }
 ```
 where
-- type: str The type of user action, either deposit or withdraw.
-- amount: str The amount of money the user is depositing or withdrawing.
-- user_id: int A unique identifier for the user.
-- time: int The timestamp of the action (this value is always increasing).
+- **type** (str) The type of user action, either deposit or withdraw.
+- **amount** (str): The amount of money the user is depositing or withdrawing.
+- **user_id** (int): A unique identifier for the user.
+- **time** (int): The timestamp of the action (this value is always increasing).
 
 The response format:
 ```json
@@ -30,22 +30,34 @@ The response format:
 ```
 
 ### Alert codes
-- Code: 1100 : A withdrawal amount over 100
-- Code: 30 : The user makes 3 consecutive withdrawals
-- Code: 300 : The user makes 3 consecutive deposits where each one is larger than the previous
+- **Code 1100** : A withdrawal amount over 100
+- **Code 30** : The user makes 3 consecutive withdrawals
+- **Code 300** : The user makes 3 consecutive deposits where each one is larger than the previous
 deposit (withdrawals in between deposits can be ignored).
-- Code: 123 : The total amount deposited in a 30-second window exceeds 200
+- **Code 123** : The total amount deposited in a 30-second window exceeds 200
 
 ### Expected behaviour
 The endpoint checks for these conditions to trigger alerts:
-- alert: Should be true if any alert codes are triggered, otherwise false.
-- alert_codes: A list of alert codes that have been triggered (if any)
-- user_id: The user_id of the user whose action was processed
+- **alert**: Should be true if any alert codes are triggered, otherwise false.
+- **alert_codes**: A list of alert codes that have been triggered (if any)
+- **user_id**: The user_id of the user whose action was processed
 
-### ToDo exercises
-- DONE: Add a new alert code: Implement a new alert code that checks if a user has made more than five transactions (deposits or withdrawals) within a 1-minute window.
-- User-specific Alerts: Allow for custom alert thresholds based on user profiles or risk ratings.
-- Implement data persistence: Currently, the application does not store any data. Implement data persistence using a database like SQLite or PostgreSQL. This will test your ability to work with databases and ORMs like SQLAlchemy.
+### Next exercises to do
+#### Add a new alert code (DONE)
+Implement a new alert code that checks if a user has made more than five transactions (deposits or withdrawals) within a 1-minute window return code 500.
+
+#### User-specific alerts
+Allow for custom alert thresholds to be based on user profiles or risk ratings.
+Users can be defined in the database with levels of risk: low, medium and high.
+If user is not found in the database, the risk level is medim.
+
+If user risk level is:
+- **low**: multiply the AMOUNT_LIMIT (or COUNT_LIMIT if no amount defined) that triggers the alert by 2.
+- **medium**: use the limits defined
+- **high:** divide the AMOUNT_LIMIT (or COUNT_LIMIT if no amount defined) that triggers the alert by 2 taking floor result and add 1.
+
+#### Implement data persistence
+Use PostgreSQL with SQLAlchemy.
 
 ## How to run
 
