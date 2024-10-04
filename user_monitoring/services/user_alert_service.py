@@ -24,10 +24,10 @@ class UserAlertService:
         """
         self.logger.info(f"Generating alerts for user action: {user_action}")
 
+        user = self.user_repository.get_by_id(user_action.user_id)
+
         self.user_action_repository.create(user_action)
         user_actions = self.user_action_repository.get_all(user_action.user_id)
-
-        user = self.user_repository.get_by_id(user_action.user_id)
 
         user_alert = {
             "alert": False,
@@ -36,7 +36,7 @@ class UserAlertService:
         }
 
         for user_alert_condition in self.user_alert_conditions:
-            if user_alert_condition.check(user_actions):
+            if user_alert_condition.check(user, user_actions):
                 user_alert["alert"] = True
                 user_alert["alert_codes"].append(user_alert_condition.code)
 

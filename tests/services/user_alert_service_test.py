@@ -11,19 +11,22 @@ def test_handle_alerts_when_no_conditions_met_returns_alert_false() -> None:
     user_action = UserAction(1, ActionType.DEPOSIT, Decimal(1), 1234000000)
 
     mock_logger = MagicMock()
-    mock_user_action_repository = MagicMock()
     mock_user_repository = MagicMock()
+    mock_user_action_repository = MagicMock()
 
     user_alert_service = UserAlertService(
         user_alert_conditions=[],
-        user_action_repository=mock_user_action_repository,
         user_repository=mock_user_repository,
+        user_action_repository=mock_user_action_repository,
         logger=mock_logger
     )
 
     user_alert = user_alert_service.handle_alerts(user_action)
 
     mock_logger.info.assert_called_once()
+
+    mock_user_repository.get_by_id.assert_called_once_with(user_action.user_id)
+
     mock_user_action_repository.create.assert_called_once_with(user_action)
     mock_user_action_repository.get_all.assert_called_once_with(user_action.user_id)
 
@@ -66,6 +69,9 @@ def test_handle_alerts_when_multiple_conditions_met_returns_alert_with_codes() -
     user_alert = user_alert_service.handle_alerts(user_action)
 
     mock_logger.info.assert_called_once()
+
+    mock_user_repository.get_by_id.assert_called_once_with(user_action.user_id)
+
     mock_user_action_repository.create.assert_called_once_with(user_action)
     mock_user_action_repository.get_all.assert_called_once_with(user_action.user_id)
 
