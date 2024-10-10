@@ -14,6 +14,14 @@ class UserAction:
         self.user_id = user_id
         self.time = time
 
+    def dict(self) -> dict:
+        return {
+            'type': self.type,
+            'amount': self.amount,
+            'user_id': self.user_id,
+            'time': self.time
+        }
+
     def __repr__(self) -> str:
         return (f"UserAction(type={self.type!r}, amount={self.amount!r}, "
                 f"user_id={self.user_id!r}, time={self.time!r})")

@@ -2,8 +2,8 @@ from decimal import Decimal
 
 import pytest
 
-from user_monitoring.models.user import User
-from user_monitoring.models.user_action import ActionType, UserAction
+from user_monitoring.DTOs.user import User
+from user_monitoring.DTOs.user_action import ActionType, UserAction
 from user_monitoring.services.user_alert_condition_withdrawal import UserAlertConditionWithdrawal
 
 

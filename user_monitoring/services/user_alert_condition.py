@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 from decimal import Decimal
 
-from user_monitoring.models.user import User
-from user_monitoring.models.user_action import UserAction
+from user_monitoring.DTOs.user import User
+from user_monitoring.DTOs.user_action import UserAction
 
 
 class UserAlertCondition(ABC):
@@ -31,7 +31,6 @@ class UserAlertCondition(ABC):
             user_actions: should contain at least one element and elements should be in time ascending order.
         """
         amount_limit, operation_limit = self._update_limits(user)
-
         return self._check_user_action(user_actions, amount_limit, operation_limit)
 
     def _update_limits(self, user: User) -> tuple[Decimal | None, int | None]:

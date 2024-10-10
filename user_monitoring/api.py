@@ -16,20 +16,17 @@ api = Blueprint("api", __name__)
 def get_user_alert_conditions() -> list[UserAlertCondition]:
     """Returns the list of user alert conditions should be used for the event."""
     return [
-        UserAlertConditionWithdrawal(),
         UserAlertConditionDepositIncrease(),
-        UserAlertConditionWithdrawalConsecutive(),
         UserAlertConditionDepositWindow(),
-        UserAlertConditionTransactionWindow()
+        UserAlertConditionTransactionWindow(),
+        UserAlertConditionWithdrawalConsecutive(),
+        UserAlertConditionWithdrawal()
     ]
 
 
 @api.post("/event")
 def handle_user_event() -> dict | Response:
     current_app.logger.info("Handling user event")
-
-    user_action_repo = getattr(current_app, 'user_action_repo')
-    user_repo = getattr(current_app, 'user_repo')
 
     if not request.is_json:
         current_app.logger.warning("Received non-JSON request")
@@ -46,8 +43,8 @@ def handle_user_event() -> dict | Response:
 
     user_alert_service = UserAlertService(
         user_alerts_conditions,
-        user_action_repo,
-        user_repo,
+        current_app.config['SESSION_MAKER'],
+        current_app.config['REPOSITORIES'],
         current_app.logger)
 
     user_alerts = user_alert_service.handle_alerts(user_action)

@@ -1,6 +1,6 @@
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from typing import Any, Dict, List
-from user_monitoring.models.user_action import ActionType, UserAction
+from user_monitoring.DTOs.user_action import ActionType, UserAction
 
 
 @staticmethod
@@ -42,8 +42,8 @@ def validate_user_event(data: Dict[str, Any]) -> UserAction:
     else:
         try:
             amount = Decimal(data['amount'])
-        except Exception:
-            errors.append("'amount' must be a decimal number")
+        except InvalidOperation as e:
+            errors.append(f"'amount' must be a decimal number: {str(e)}")
 
     if amount <= 0:
         errors.append("'amount' must be a greater than 0")
