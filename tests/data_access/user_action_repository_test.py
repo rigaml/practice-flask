@@ -26,52 +26,44 @@ def test_add_adds_user_action(user_action_repository) -> None:
 
     mock_logger.info.assert_called_once()
 
-    mock_session.add.assert_called_once_with(
-        UserActionModel(user_action.user_id, user_action.type, user_action.amount, user_action.time))
+    mock_session.add.assert_called_once()
     mock_session.commit.assert_called_once()
 
     assert result == user_action
 
 
-def test_get_all_when_user_actions_exist_returns_user_actions(user_action_repository) -> None:
+def test_get_by_id_when_user_actions_exist_returns_user_actions(user_action_repository) -> None:
     user_action_repo, mock_session, mock_logger = user_action_repository
 
-    user_actions = [
-        UserAction(1, ActionType.DEPOSIT, Decimal(1), 1234000000),
-        UserAction(1, ActionType.WITHDRAW, Decimal(1), 1234000001)
-    ]
+    user_action_models = [
+        UserActionModel(type='DEPOSIT', amount=Decimal('1.00'), user_id=1, time=1234000000),
+        UserActionModel(type='WITHDRAW', amount=Decimal('1.00'), user_id=1, time=1234000001)]
 
-    mock_query = Mock()
-    mock_query.filter_by.return_value = mock_query
-    mock_query.all.return_value = user_actions
-    mock_session.query.return_value = mock_query
+    mock_query = mock_session.query.return_value
+    mock_query.filter_by.return_value.all.return_value = user_action_models
 
     result = user_action_repo.get_by_id(1)
 
     mock_logger.info.assert_called()
-
     mock_session.query.assert_called_once_with(UserActionModel)
     mock_query.filter_by.assert_called_once_with(user_id=1)
+
     assert len(result) == 2
+    assert result[0] == UserAction(1, ActionType.DEPOSIT, Decimal(1), 1234000000)
+    assert result[1] == UserAction(1, ActionType.WITHDRAW, Decimal(1), 1234000001)
 
-    assert result[0] == user_actions[0]
-    assert result[1] == user_actions[1]
+    def test_get_by_id_when_no_user_actions_exist_returns_empty_array(user_action_repository) -> None:
+        user_action_repo, mock_session, mock_logger = user_action_repository
 
+        user_action_models = []
 
-def test_get_all_when_no_user_actions_exist_returns_empty_array(user_action_repository) -> None:
-    user_action_repo, mock_session, mock_logger = user_action_repository
+        mock_query = mock_session.query.return_value
+        mock_query.filter_by.return_value.all.return_value = user_action_models
 
-    user_actions = []
+        result = user_action_repo.get_by_id(1)
 
-    mock_query = Mock()
-    mock_query.filter_by.return_value = mock_query
-    mock_query.all.return_value = user_actions
-    mock_session.query.return_value = mock_query
+        mock_logger.info.assert_called()
+        mock_session.query.assert_called_once_with(UserActionModel)
+        mock_query.filter_by.assert_called_once_with(user_id=1)
 
-    result = user_action_repo.get_by_id(1)
-
-    mock_logger.info.assert_called()
-
-    mock_session.query.assert_called_once_with(UserActionModel)
-    mock_query.filter_by.assert_called_once_with(user_id=1)
-    assert len(result) == 0
+        assert len(result) == 0

@@ -15,10 +15,12 @@ class UserRepository:
 
     def get_by_id(self, user_id: int) -> User:
         """
-        Get the user with the given user_id and if not found returns a default user.
+        Gets the user with the given user_id and if not found returns a default user.
         """
+        self.logger.info(f"Getting user with user_id: {user_id}")
+
         user_data = self.session.query(UserModel).filter_by(user_id=user_id).first()
         if user_data:
-            return User(user_id, user_data["risk"])
+            return User(user_id, user_data.risk)
 
         return User(user_id, "medium")

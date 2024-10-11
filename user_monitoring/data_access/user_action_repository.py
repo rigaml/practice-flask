@@ -37,6 +37,6 @@ class UserActionRepository:
 
         return [
             UserAction(
-                user_action_m.user_id, ActionType[user_action_m.type], user_action_m.amount, user_action_m.time)
-            for user_action_m in query.all()
+                model.user_id, ActionType[model.type], model.amount, model.time)
+            for model in query.all()
         ]

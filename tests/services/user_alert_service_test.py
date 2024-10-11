@@ -1,9 +1,12 @@
 from decimal import Decimal
 import logging
-from unittest.mock import Mock
+from unittest.mock import Mock, create_autospec
 
+from tests.conftest import MockSessionMaker
 from user_monitoring.DTOs.user_action import ActionType, UserAction
 from user_monitoring.data_access.repositories_registry import RepositoriesRegistry
+from user_monitoring.data_access.user_action_repository import UserActionRepository
+from user_monitoring.data_access.user_repository import UserRepository
 from user_monitoring.services.user_alert_condition import UserAlertCondition
 from user_monitoring.services.user_alert_service import UserAlertService
 
@@ -12,8 +15,12 @@ def test_handle_alerts_when_no_conditions_met_returns_alert_false() -> None:
 
     user_action = UserAction(1, ActionType.DEPOSIT, Decimal(1), 1234000000)
 
-    mock_session_maker = Mock()
-    mock_repository_registry = Mock(spec=RepositoriesRegistry)
+    mock_session_maker = MockSessionMaker()
+    mock_user_action_repository = create_autospec(UserActionRepository)
+    mock_user_repository = create_autospec(UserRepository)
+    mock_repository_registry = RepositoriesRegistry(
+        mock_user_action_repository,
+        mock_user_repository)
     mock_logger = Mock(spec=logging.Logger)
 
     user_alert_service = UserAlertService(
@@ -27,21 +34,25 @@ def test_handle_alerts_when_no_conditions_met_returns_alert_false() -> None:
 
     mock_logger.info.assert_called_once()
 
-    mock_user_repository.get_by_id.assert_called_once_with(user_action.user_id)
+    mock_user_repository.return_value.get_by_id.assert_called_once_with(user_action.user_id)
 
-    mock_user_action_repository.create.assert_called_once_with(user_action)
-    mock_user_action_repository.get_all.assert_called_once_with(user_action.user_id)
+    mock_user_action_repository.return_value.add.assert_called_once_with(user_action)
+    mock_user_action_repository.return_value.get_by_id.assert_called_once_with(user_action.user_id)
 
     assert user_alert == {"alert": False, "alert_codes": [], "user_id": user_action.user_id}
 
 
 def test_handle_alerts_when_multiple_conditions_met_returns_alert_with_codes() -> None:
 
-    user_action = UserAction(1, ActionType.DEPOSIT, Decimal(1), 1234000000)
+    mock_session_maker = MockSessionMaker()
+    mock_user_action_repository = create_autospec(UserActionRepository)
+    mock_user_repository = create_autospec(UserRepository)
+    mock_repository_registry = RepositoriesRegistry(
+        mock_user_action_repository,
+        mock_user_repository)
+    mock_logger = Mock(spec=logging.Logger)
 
-    mock_logger = Mock()
-    mock_user_action_repository = Mock()
-    mock_user_repository = Mock()
+    user_action = UserAction(1, ActionType.DEPOSIT, Decimal(1), 1234000000)
 
     mock_alert_true_code11 = Mock(spec=UserAlertCondition)
     mock_alert_true_code11.check.return_value = True
@@ -61,12 +72,8 @@ def test_handle_alerts_when_multiple_conditions_met_returns_alert_with_codes() -
         mock_alert_true_code33
     ]
 
-    mock_session_maker = Mock()
-    mock_repository_registry = Mock()
-    mock_logger = Mock(spec=logging.Logger)
-
     user_alert_service = UserAlertService(
-        user_alert_conditions=[],
+        user_alert_conditions=user_alert_conditions,
         session_maker=mock_session_maker,
         repositories_registry=mock_repository_registry,
         logger=mock_logger
@@ -76,9 +83,9 @@ def test_handle_alerts_when_multiple_conditions_met_returns_alert_with_codes() -
 
     mock_logger.info.assert_called_once()
 
-    mock_user_repository.get_by_id.assert_called_once_with(user_action.user_id)
+    mock_user_repository.return_value.get_by_id.assert_called_once_with(user_action.user_id)
 
-    mock_user_action_repository.create.assert_called_once_with(user_action)
-    mock_user_action_repository.get_all.assert_called_once_with(user_action.user_id)
+    mock_user_action_repository.return_value.add.assert_called_once_with(user_action)
+    mock_user_action_repository.return_value.get_by_id.assert_called_once_with(user_action.user_id)
 
     assert user_alert == {"alert": True, "alert_codes": [11, 33], "user_id": user_action.user_id}

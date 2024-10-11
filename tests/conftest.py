@@ -1,5 +1,6 @@
+from contextlib import contextmanager
 from typing import Generator
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, Mock
 
 import pytest
 from flask.testing import FlaskClient
@@ -14,43 +15,64 @@ from user_monitoring.DTOs.user_action import UserAction
 
 
 class DummyUserActionRepo(UserActionRepository):
-    def __init__(self, _):
-        self.user_actions = []
+    class_user_actions = []
+
+    def __init__(self, _, __):
+        pass
 
     def add(self, user_action: UserAction) -> UserAction:
-        self.user_actions.append(user_action)
+        DummyUserActionRepo.class_user_actions.append(user_action)
+        print(f"!!!!user_action: {user_action} ({len(DummyUserActionRepo.class_user_actions)})")
         return user_action
 
     def get_by_id(self, user_id: int) -> list[UserAction]:
-        return [user_action for user_action in self.user_actions if user_action.user_id == user_id]
+        return [user_action for user_action in DummyUserActionRepo.class_user_actions if user_action.user_id == user_id]
 
 
 class DummyUserRepo(UserRepository):
-    def __init__(self, _):
-        self.users = []
+    class_users = []
+
+    def __init__(self, _, __):
+        pass
 
     def get_by_id(self, user_id: int) -> User:
-        for user in self.users:
+        for user in DummyUserRepo.class_users:
             if user.user_id == user_id:
                 return user
 
         return User(user_id, "medium")
 
 
-@ pytest.fixture
+@contextmanager
+def mock_session_context():
+    session = MagicMock()
+    try:
+        yield session
+    finally:
+        session.close()
+
+
+class MockSessionMaker:
+    def __call__(self):
+        return mock_session_context()
+
+
+@pytest.fixture
 def app() -> Generator[Flask, None, None]:
-    session_maker = MagicMock()
+
+    mock_session_maker = MagicMock()
+    mock_session_maker.side_effect = mock_session_context
 
     repositories_registry = RepositoriesRegistry(
         user_action_repository=DummyUserActionRepo,
         user_repository=DummyUserRepo)
 
-    app = create_app(session_maker, repositories_registry)
+    app = create_app(mock_session_maker, repositories_registry)
     with app.app_context():
         yield app
 
 
-@ pytest.fixture
+@pytest.fixture
 def client(app: Flask) -> FlaskClient:
     return app.test_client()
 
@@ -58,16 +80,16 @@ def client(app: Flask) -> FlaskClient:
 TEST_USER_ID = 1
 
 
-@ pytest.fixture
+@pytest.fixture
 def low_risk_user():
     return User(user_id=TEST_USER_ID, risk="low")
 
 
-@ pytest.fixture
+@pytest.fixture
 def normal_risk_user():
     return User(user_id=TEST_USER_ID, risk="normal")
 
 
-@ pytest.fixture
+@pytest.fixture
 def high_risk_user():
     return User(user_id=TEST_USER_ID, risk="high")

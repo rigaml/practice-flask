@@ -21,10 +21,8 @@ def test_get_by_id_when_user_exist_returns_user(user_repository) -> None:
 
     user = User(1, "high")
 
-    mock_query = Mock()
-    mock_query.filter_by.return_value = mock_query
-    mock_query.first.return_value = user
-    mock_session.query.return_value = mock_query
+    mock_query = mock_session.query.return_value
+    mock_query.filter_by.return_value.first.return_value = user
 
     result = user_repo.get_by_id(1)
 
@@ -41,10 +39,8 @@ def test_get_by_id_when_called_and_no_user_actions_retrieved_returns_empty_array
 
     user = None
 
-    mock_query = Mock()
-    mock_query.filter_by.return_value = mock_query
-    mock_query.first.return_value = user
-    mock_session.query.return_value = mock_query
+    mock_query = mock_session.query.return_value
+    mock_query.filter_by.return_value.first.return_value = user
 
     result = user_repo.get_by_id(1)
 
