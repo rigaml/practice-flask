@@ -46,7 +46,7 @@ The endpoint checks for these conditions to trigger alerts:
 #### Add a new alert code (DONE)
 Implement a new alert code that checks if a user has made more than five transactions (deposits or withdrawals) within a 1-minute window return code 500.
 
-#### User-specific alerts
+#### User-specific alerts (DONE)
 Allow for custom alert thresholds to be based on user profiles or risk ratings.
 Users can be defined in the database with levels of risk: low, medium and high.
 If user is not found in the database, the risk level is medim.
@@ -56,8 +56,8 @@ If user risk level is:
 - **medium**: use the limits defined
 - **high:** divide the AMOUNT_LIMIT (or COUNT_LIMIT if no amount defined) that triggers the alert by 2 taking floor result and add 1.
 
-#### Implement data persistence
-Use PostgreSQL with SQLAlchemy.
+#### Implement data persistence (DONE)
+Use SQLAlchemy to handle a physical database (SQLite, PostgreSQL)
 
 ## How to run
 
