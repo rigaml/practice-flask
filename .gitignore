@@ -3,6 +3,7 @@
 
 # START: Project specific
 database
+migrations/versions/
 
 # END: Project specific
 
