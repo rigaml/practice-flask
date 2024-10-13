@@ -1,11 +1,9 @@
 """    
 For this coding test, application implements an in-memory database, which means that data will be lost when the server restarts.
-
-TODO: When developing a real application, a persistent database (ex. PostgreSQL, MySQL...) should be used.
-
 """
 import logging
-from user_monitoring.models.user_action import UserAction
+from user_monitoring.DTOs.user_action import ActionType, UserAction
+from user_monitoring.models.user_action_model import UserActionModel
 
 
 class UserActionRepository:
@@ -13,14 +11,32 @@ class UserActionRepository:
     Encapsulates data access for UserAction.
     """
 
-    def __init__(self, logger: logging.Logger) -> None:
-        self.user_actions_fake = []
+    def __init__(self, session, logger: logging.Logger) -> None:
+        self.session = session
         self.logger = logger
 
-    def create(self, user_action: UserAction) -> None:
+    def add(self, user_action: UserAction) -> UserAction:
         self.logger.info(f"Adding to repository user action: {user_action}")
-        self.user_actions_fake.append(user_action)
 
-    def get_all(self, user_id: int) -> list[UserAction]:
+        user_action_model = UserActionModel(
+            user_id=user_action.user_id,
+            type=user_action.type.name,
+            amount=user_action.amount,
+            time=user_action.time
+        )
+
+        self.session.add(user_action_model)
+        self.session.commit()
+
+        return UserAction(user_action.user_id, user_action.type, user_action.amount, user_action.time)
+
+    def get_by_id(self, user_id: int) -> list[UserAction]:
         self.logger.info(f"Getting all user actions for user_id: {user_id}")
-        return [user_action for user_action in self.user_actions_fake if user_action.user_id == user_id]
+
+        query = self.session.query(UserActionModel).filter_by(user_id=user_id)
+
+        return [
+            UserAction(
+                model.user_id, ActionType[model.type], model.amount, model.time)
+            for model in query.all()
+        ]

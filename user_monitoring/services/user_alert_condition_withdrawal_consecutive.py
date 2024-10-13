@@ -2,7 +2,7 @@
 
 from decimal import Decimal
 from user_monitoring.services.user_alert_condition import UserAlertCondition
-from user_monitoring.models.user_action import UserAction, ActionType
+from user_monitoring.DTOs.user_action import UserAction, ActionType
 
 
 class UserAlertConditionWithdrawalConsecutive(UserAlertCondition):

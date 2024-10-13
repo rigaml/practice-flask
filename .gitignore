@@ -1,6 +1,12 @@
 # Created by https://www.toptal.com/developers/gitignore/api/macos,windows,linux,python
 # Edit at https://www.toptal.com/developers/gitignore?templates=macos,windows,linux,python
 
+# START: Project specific
+database
+migrations/versions/
+
+# END: Project specific
+
 ### Linux ###
 *~
 

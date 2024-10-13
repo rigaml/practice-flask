@@ -1,5 +1,5 @@
 from decimal import Decimal
-from user_monitoring.models.user_action import ActionType, UserAction
+from user_monitoring.DTOs.user_action import ActionType, UserAction
 
 
 def test_user_action() -> None:

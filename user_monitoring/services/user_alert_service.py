@@ -1,7 +1,7 @@
 import logging
-from user_monitoring.data_access.user_repository import UserRepository
-from user_monitoring.models.user_action import UserAction
-from user_monitoring.data_access.user_action_repository import UserActionRepository
+from typing import Any
+from user_monitoring.data_access.repositories_registry import RepositoriesRegistry
+from user_monitoring.DTOs.user_action import UserAction
 from user_monitoring.services.user_alert_condition import UserAlertCondition
 
 
@@ -9,12 +9,12 @@ class UserAlertService:
     def __init__(
             self,
             user_alert_conditions: list[UserAlertCondition],
-            user_action_repository: UserActionRepository,
-            user_repository: UserRepository,
+            session_maker: Any,
+            repositories_registry: RepositoriesRegistry,
             logger: logging.Logger) -> None:
         self.user_alert_conditions = user_alert_conditions
-        self.user_action_repository = user_action_repository
-        self.user_repository = user_repository
+        self.session_maker = session_maker
+        self.repositories_registry = repositories_registry
         self.logger = logger
 
     def handle_alerts(self, user_action: UserAction):
@@ -24,10 +24,13 @@ class UserAlertService:
         """
         self.logger.info(f"Generating alerts for user action: {user_action}")
 
-        user = self.user_repository.get_by_id(user_action.user_id)
+        with self.session_maker() as session:
+            user_repository = self.repositories_registry.user_repository(session, self.logger)
+            user_action_repository = self.repositories_registry.user_action_repository(session, self.logger)
 
-        self.user_action_repository.create(user_action)
-        user_actions = self.user_action_repository.get_all(user_action.user_id)
+            user = user_repository.get_by_id(user_action.user_id)
+            user_action_repository.add(user_action)
+            user_actions = user_action_repository.get_by_id(user_action.user_id)
 
         user_alert = {
             "alert": False,

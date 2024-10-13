@@ -2,7 +2,7 @@
 from decimal import Decimal
 import pytest
 
-from user_monitoring.models.user_action import ActionType, UserAction
+from user_monitoring.DTOs.user_action import ActionType, UserAction
 from user_monitoring.utils.validators import convert_to_action_type, validate_user_event
 
 
