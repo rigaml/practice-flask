@@ -2,7 +2,7 @@ from decimal import Decimal
 import logging
 from unittest.mock import Mock, create_autospec
 
-from tests.conftest import MockSessionMaker
+from tests.conftest import mock_session_context
 from user_monitoring.DTOs.user_action import ActionType, UserAction
 from user_monitoring.data_access.repositories_registry import RepositoriesRegistry
 from user_monitoring.data_access.user_action_repository import UserActionRepository
@@ -15,7 +15,6 @@ def test_handle_alerts_when_no_conditions_met_returns_alert_false() -> None:
 
     user_action = UserAction(1, ActionType.DEPOSIT, Decimal(1), 1234000000)
 
-    mock_session_maker = MockSessionMaker()
     mock_user_action_repository = create_autospec(UserActionRepository)
     mock_user_repository = create_autospec(UserRepository)
     mock_repository_registry = RepositoriesRegistry(
@@ -25,7 +24,7 @@ def test_handle_alerts_when_no_conditions_met_returns_alert_false() -> None:
 
     user_alert_service = UserAlertService(
         user_alert_conditions=[],
-        session_maker=mock_session_maker,
+        session_maker=mock_session_context,
         repositories_registry=mock_repository_registry,
         logger=mock_logger
     )
@@ -44,7 +43,6 @@ def test_handle_alerts_when_no_conditions_met_returns_alert_false() -> None:
 
 def test_handle_alerts_when_multiple_conditions_met_returns_alert_with_codes() -> None:
 
-    mock_session_maker = MockSessionMaker()
     mock_user_action_repository = create_autospec(UserActionRepository)
     mock_user_repository = create_autospec(UserRepository)
     mock_repository_registry = RepositoriesRegistry(
@@ -74,7 +72,7 @@ def test_handle_alerts_when_multiple_conditions_met_returns_alert_with_codes() -
 
     user_alert_service = UserAlertService(
         user_alert_conditions=user_alert_conditions,
-        session_maker=mock_session_maker,
+        session_maker=mock_session_context,
         repositories_registry=mock_repository_registry,
         logger=mock_logger
     )

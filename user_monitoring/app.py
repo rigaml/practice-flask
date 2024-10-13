@@ -27,6 +27,6 @@ def create_app(
 def configure_logging() -> None:
     """
     Set up logging to stdout.
-    TODO: Extra configuration is required to log to file or external service.
+    TODO: Add configuration to log to file or external service.
     """
     logging.basicConfig(level=logging.INFO)

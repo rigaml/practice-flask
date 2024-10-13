@@ -52,22 +52,14 @@ def mock_session_context():
         session.close()
 
 
-class MockSessionMaker:
-    def __call__(self):
-        return mock_session_context()
-
-
 @pytest.fixture
 def app() -> Generator[Flask, None, None]:
-
-    mock_session_maker = MagicMock()
-    mock_session_maker.side_effect = mock_session_context
 
     repositories_registry = RepositoriesRegistry(
         user_action_repository=DummyUserActionRepo,
         user_repository=DummyUserRepo)
 
-    app = create_app(mock_session_maker, repositories_registry)
+    app = create_app(mock_session_context, repositories_registry)
     with app.app_context():
         yield app
 
