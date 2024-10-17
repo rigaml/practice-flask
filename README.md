@@ -43,13 +43,6 @@ The endpoint checks for these conditions to trigger alerts:
 - **user_id**: The user_id of the user whose action was processed
 
 ### TODO Exercises
-#### RESTful endpoints
-Convert API to RESTful
-- `POST /api/v1/events`: Create a new event, and returns the event_id and alert_id (or null if no alert) with status code 201 when created
-- `GET /api/v1/events/<event_id>`: Retrieve a specific event
-- `GET /api/v1/alerts`: List all alerts
-- `GET /api/v1/alerts/<alert_id>`: Retrieve a specific alert
-
 #### Add a new alert code (DONE)
 Implement a new alert code that checks if a user has made more than five transactions (deposits or withdrawals) within a 1-minute window return code 500.
 
@@ -65,6 +58,16 @@ If user risk level is:
 
 #### Implement data persistence (DONE)
 Use SQLAlchemy to handle a physical/persistent database (SQLite, PostgreSQL)
+
+#### Add get endpoint (DONE)
+Given a userId in the Url path, retrieve actions from that user.
+
+#### RESTful endpoints
+Convert API to RESTful
+- `POST /api/v1/events`: Create a new event, and returns the event_id and alert_id (or null if no alert) with status code 201 when created
+- `GET /api/v1/events/<event_id>`: Retrieve a specific event
+- `GET /api/v1/alerts`: List all alerts
+- `GET /api/v1/alerts/<alert_id>`: Retrieve a specific alert
 
 ## How to run
 

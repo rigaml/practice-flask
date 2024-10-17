@@ -17,7 +17,7 @@ class UserAction:
 
     def dict(self) -> dict:
         return {
-            'type': self.type,
+            'type': self.type.name,
             'amount': self.amount,
             'user_id': self.user_id,
             'time': self.time

@@ -1,4 +1,5 @@
 from flask import Blueprint, Response, current_app, make_response, request, jsonify
+from flask.views import MethodView
 
 from user_monitoring.services.user_alert_condition import UserAlertCondition
 from user_monitoring.services.user_alert_condition_deposit_increase import UserAlertConditionDepositIncrease
@@ -24,29 +25,44 @@ def get_user_alert_conditions() -> list[UserAlertCondition]:
     ]
 
 
-@api.post("/event")
-def handle_user_event() -> dict | Response:
-    current_app.logger.info("Handling user event")
+class UserEventCollection(MethodView):
+    def __init__(self) -> None:
+        """
+        Assuming the parameters for UserAlertService don't change in the lifetime of the app.
+        """
+        user_alerts_conditions = get_user_alert_conditions()
 
-    if not request.is_json:
-        current_app.logger.warning("Received non-JSON request")
-        return make_response(jsonify({"error": "Request must be JSON"}), 400)
+        self.user_alert_service = UserAlertService(
+            user_alerts_conditions,
+            current_app.config['SESSION_MAKER'],
+            current_app.config['REPOSITORIES'],
+            current_app.logger)
 
-    user_action_data = request.get_json()
-    try:
-        user_action = validate_user_event(user_action_data)
-    except Exception as e:
-        current_app.logger.info(f"Invalid user event {user_action_data} errors: {e}")
-        return make_response(jsonify({"error": str(e)}), 400)
+    def get(self, action_id: int) -> list[dict]:
 
-    user_alerts_conditions = get_user_alert_conditions()
+        actions = self.user_alert_service.get_user_actions(action_id)
+        return actions
 
-    user_alert_service = UserAlertService(
-        user_alerts_conditions,
-        current_app.config['SESSION_MAKER'],
-        current_app.config['REPOSITORIES'],
-        current_app.logger)
+    def post(self) -> dict | Response:
+        current_app.logger.info("Handling user event")
 
-    user_alerts = user_alert_service.handle_alerts(user_action)
+        if not request.is_json:
+            current_app.logger.warning("Received non-JSON request")
+            return make_response(jsonify({"error": "Request must be JSON"}), 400)
 
-    return user_alerts
+        user_action_data = request.get_json()
+        try:
+            user_action = validate_user_event(user_action_data)
+        except Exception as e:
+            current_app.logger.info(f"Invalid user event {user_action_data} errors: {e}")
+            return make_response(jsonify({"error": str(e)}), 400)
+
+        user_alerts = self.user_alert_service.handle_alerts(user_action)
+
+        return user_alerts
+
+
+api.add_url_rule("/event/<int:action_id>",
+                 view_func=UserEventCollection.as_view("user_event_get"), methods=["GET"])
+api.add_url_rule("/event",
+                 view_func=UserEventCollection.as_view("user_event_post"), methods=["POST"])

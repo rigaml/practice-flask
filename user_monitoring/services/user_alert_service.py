@@ -17,6 +17,11 @@ class UserAlertService:
         self.repositories_registry = repositories_registry
         self.logger = logger
 
+    def get_user_actions(self, user_id: int) -> list[dict]:
+        with self.session_maker() as session:
+            user_action_repository = self.repositories_registry.user_action_repository(session, self.logger)
+            return [user_action.dict() for user_action in user_action_repository.get_by_id(user_id)]
+
     def handle_alerts(self, user_action: UserAction):
         """
         Checks user alert conditions based on user actions and returns corresponding alert codes if conditions are met.
