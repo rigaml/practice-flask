@@ -26,16 +26,21 @@ def get_user_alert_conditions() -> list[UserAlertCondition]:
 
 
 class UserEventCollection(MethodView):
+    def __init__(self) -> None:
+        """
+        Assuming the parameters for UserAlertService don't change in the lifetime of the app.
+        """
+        user_alerts_conditions = get_user_alert_conditions()
 
-    def get(self, action_id: int) -> list[dict]:
-
-        user_alert_service = UserAlertService(
-            [],
+        self.user_alert_service = UserAlertService(
+            user_alerts_conditions,
             current_app.config['SESSION_MAKER'],
             current_app.config['REPOSITORIES'],
             current_app.logger)
 
-        actions = user_alert_service.get_user_actions(action_id)
+    def get(self, action_id: int) -> list[dict]:
+
+        actions = self.user_alert_service.get_user_actions(action_id)
         return actions
 
     def post(self) -> dict | Response:
@@ -52,15 +57,7 @@ class UserEventCollection(MethodView):
             current_app.logger.info(f"Invalid user event {user_action_data} errors: {e}")
             return make_response(jsonify({"error": str(e)}), 400)
 
-        user_alerts_conditions = get_user_alert_conditions()
-
-        user_alert_service = UserAlertService(
-            user_alerts_conditions,
-            current_app.config['SESSION_MAKER'],
-            current_app.config['REPOSITORIES'],
-            current_app.logger)
-
-        user_alerts = user_alert_service.handle_alerts(user_action)
+        user_alerts = self.user_alert_service.handle_alerts(user_action)
 
         return user_alerts
 
