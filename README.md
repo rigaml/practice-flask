@@ -42,7 +42,14 @@ The endpoint checks for these conditions to trigger alerts:
 - **alert_codes**: A list of alert codes that have been triggered (if any)
 - **user_id**: The user_id of the user whose action was processed
 
-### Next exercises to do
+### TODO Exercises
+#### RESTful endpoints
+Convert API to RESTful
+- `POST /api/v1/events`: Create a new event, and returns the event_id and alert_id (or null if no alert) with status code 201 when created
+- `GET /api/v1/events/<event_id>`: Retrieve a specific event
+- `GET /api/v1/alerts`: List all alerts
+- `GET /api/v1/alerts/<alert_id>`: Retrieve a specific alert
+
 #### Add a new alert code (DONE)
 Implement a new alert code that checks if a user has made more than five transactions (deposits or withdrawals) within a 1-minute window return code 500.
 
