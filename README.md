@@ -86,27 +86,39 @@ There is a `Makefile` with a `run` command to start the application. It also has
 poetry install
 ```
 
-### Setup the database
-First run command to initialize Alembic for the project(creates a `migrations` folder in the project): 
+### Setup the database with Alembic
+Alembic is a database migration tool that:
+- Tracks changes to your database schema
+- Maintains version history
+- Allows rollback of changes
+
+With Alembic package installed, initialize migrations running command:
 ```bash
     alembic init migrations
 ```
-Edit the `alembic.ini` file:
-```
-    script_location: should be set to `migrations` as specified in previous command
-    sqlalchemy.url: define your database connection string. ex: sqlite:///database/example.db
-```
-Edit the `env.py` file in the alembic folder to set the metadata of the project's database
+Command creates `migrations` folder where stores the migrations.
+In the base folder, edit the `alembic.ini` file:
+- `script_location`: should be set to `migrations` if this was the name in previous command
+- `sqlalchemy.url`: define your database connection string. ex: sqlite:///relative/path/to/file.db
+
+In the migrations folder, edit `env.py` and set the `target_metadata` line to the `Base` in your project
 ```python
     from user_monitoring.models.base import Base
     ...
     target_metadata = Base.metadata
 ```
-Run the following commands to create the migrations (if database is in a folder, ensure it exists):
+Create migration scripts (if database should be created in a folder, ensure it exists):
 ```bash
     alembic revision --autogenerate -m "your migration message"
 ```
-Review the migrations generated and run the following command to upgrade the database:
+If there are already tables created in the database your add the imports in `env.py` so Alembic can see them.
+```python
+    from user_monitoring.models.user_action_model import UserActionModel
+```
+
+Review the migrations generated in `migrations\versions` folder
+
+Then, once happy with the script changes, run the following command to upgrade the database:
 ```bash
     alembic upgrade head
 ```
